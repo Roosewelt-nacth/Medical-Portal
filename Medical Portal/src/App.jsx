@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {  loginUser , verifyEmail } from './api';
+import crypto from 'crypto';
 
 function App() {
   const [username, setUsername] = useState('');
@@ -32,7 +33,7 @@ function App() {
     try {
       // Generate a random verification key
       const key = generateVerificationKey();
-      setVerificationKey(key);
+      setVerificationKey(key);  
       // Send verification email with the generated key
       await sendVerificationEmail(email, key);
       setIsVerificationSent(true);
@@ -55,16 +56,15 @@ function App() {
 
   // Function to generate a random verification key
   const generateVerificationKey = () => {
-    // Implementation to generate a random key
-    // For example, you can use a library like 'uuid' or generate a random string
-    return 'random_verification_key'; // Replace with actual implementation
+    return crypto.randomBytes(6).toString('hex').toUpperCase(); // Generates a 12-character alphanumeric key
   };
+  
+  // Example usage
+  console.log(generateVerificationKey()); // Output: A random verification key
+  
 
   // Function to send verification email
   const sendVerificationEmail = async (email, key) => {
-    // Implement sending email using an email service
-    // For example, you can use a library like 'nodemailer'
-    // Here, we simulate sending email by logging to console
     console.log(`Verification email sent to ${email} with key: ${key}`);
   };
 
