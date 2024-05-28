@@ -1,173 +1,37 @@
-import { useState } from 'react';
-import {  loginUser , verifyEmail } from './api';
-import crypto from 'crypto';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './frontend/Home';
+import Login from './frontend/Login';
+import Register from './frontend/Register';
+import View from './frontend/View';
 
-function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [gender, setGender] = useState('');
-  const [message, setMessage] = useState('');
-  const [registrationSuccess, setRegistrationSuccess] = useState(false); 
-  const [verificationKey, setVerificationKey] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [isVerificationSent, setIsVerificationSent] = useState(false);
-
-  const handleVerification = async (e) => {
-    e.preventDefault();
-    try {
-      // Implement verifyEmail function in api.js
-      const response = await verifyEmail(email, verificationCode); 
-      setMessage(response.message);
-      setRegistrationSuccess(false);
-      // Clear verification code after successful verification
-      setVerificationCode('');
-    } catch (error) {
-      setMessage('Email verification failed');
-    }
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      // Generate a random verification key
-      const key = generateVerificationKey();
-      setVerificationKey(key);  
-      // Send verification email with the generated key
-      await sendVerificationEmail(email, key);
-      setIsVerificationSent(true);
-    } catch (error) {
-      setMessage('Failed to send verification email');
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await loginUser(username, password);
-      setMessage(response.message);
-      setUsername('');
-      setPassword('');
-    } catch (error) {
-      setMessage('Login failed');
-    }
-  };
-
-  // Function to generate a random verification key
-  const generateVerificationKey = () => {
-    return crypto.randomBytes(6).toString('hex').toUpperCase(); // Generates a 12-character alphanumeric key
-  };
-  
-  // Example usage
-  console.log(generateVerificationKey()); // Output: A random verification key
-  
-
-  // Function to send verification email
-  const sendVerificationEmail = async (email, key) => {
-    console.log(`Verification email sent to ${email} with key: ${key}`);
-  };
-
+export default function App() {
   return (
-    <div>
-      {registrationSuccess ? (
-        <div>
-          <h1>Verify Email</h1>
-          <form onSubmit={handleVerification}>
-            {/* Input for verification code */}
-            <input
-              type="text"
-              placeholder="Verification Code"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-            />
-            <button type="submit">Verify</button>
-          </form>
-        </div>
-      ) : (
-        <div>
-          <h1>Register</h1>
-          <form onSubmit={handleRegister}>
-            {/* Registration form */}
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="number"
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="male"
-                  checked={gender === "male"}
-                  onChange={(e) => setGender(e.target.value)}
-                />Male
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="female"
-                  checked={gender === "female"}
-                  onChange={(e) => setGender(e.target.value)}
-                />Female
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="gender"
-                  value="other"
-                  checked={gender === "other"}
-                  onChange={(e) => setGender(e.target.value)}
-                />Other
-              </label>
-            </div>
-            <button type="submit">Register</button>
-          </form>
-          {isVerificationSent && <p>Verification email sent to {email}</p>}
-        </div>
-      )}
-
-      {/* Existing login form */}
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">Login</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="register" element={<Register />} />
+        <Route path="login" element={<Login />} />
+        <Route path="view" element={<View />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
-export default App;
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
+
+
+
+
+
+// if (!root.hasOwnProperty('_fiber')) {
+//   root.render(<App />);
+// } else {
+//   // If the root has already been rendered, update it using render()
+//   root.render(<App />);
+// }
+// ReactDOM.render(<App />, document.getElementById('root')); // Render the App component
+// export default App;

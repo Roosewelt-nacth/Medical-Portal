@@ -20,7 +20,7 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
-// Define User schema and model
+// Define User schema and model for normal User
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
   password: { type: String, required: true },
@@ -32,6 +32,16 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+const doctorSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  location: { type: String, required: true },
+  schedule: { type: Date, required: true }, 
+  fee: { type: Number, required: true }
+});
+
+const Doctor = mongoose.model('Doctor', doctorSchema);
+
 // Generate a random verification key
 const generateVerificationKey = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase(); // Generates a 6-character alphanumeric key
@@ -40,13 +50,11 @@ const generateVerificationKey = () => {
 // Send verification email
 const sendVerificationEmail = async (email, verificationKey) => {
   const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false, // Use `true` for port 465, `false` for all other ports
-    auth: {
-      user: "maddison53@ethereal.email", // Your Ethereal email address
-      pass: "jn7jnAPss4f63QBp6D", // Your Ethereal email password
-    },
+    service : 'gmail',
+    auth : {
+      user :'',
+      pass :''
+    }
   });
 
   const mailOptions = {
@@ -105,4 +113,25 @@ app.post('/api/verifyEmail', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+
+app.post('/add-doctor', async (req, res) => {
+  try {
+    const { name, description, location, schedule, fee } = req.body;
+    const newDoctor = new Doctor({ name, description, location, schedule, fee });
+    await newDoctor.save();
+    res.status(201).json(newDoctor);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add doctor' });
+  }
+});
+
+app.get('/doctors', async (req, res) => {
+  try {
+    const doctors = await Doctor.find();
+    res.status(200).json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch doctors' });
+  }
 });
