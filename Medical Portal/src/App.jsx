@@ -5,6 +5,7 @@ import Home from './frontend/Home';
 import Login from './frontend/Login';
 import Register from './frontend/Register';
 import View from './frontend/View';
+import Chat from './frontend/chat';
 
 export default function App() {
   return (
@@ -14,13 +15,16 @@ export default function App() {
         <Route path="register" element={<Register />} />
         <Route path="login" element={<Login />} />
         <Route path="view" element={<View />} />
+        <Route path="chat" element={<Chat/>}/>
       </Routes>
     </BrowserRouter>
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+
+
+// const root = ReactDOM.createRoot(document.getElementById('root'));
+// root.render(<App />);
 
 
 

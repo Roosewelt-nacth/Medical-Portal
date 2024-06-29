@@ -3,6 +3,10 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
+import http from 'http';
+import socketIo from 'socket.io';
+import multer from 'multer';
+import path from 'path';
 
 const app = express();
 app.use(cors());
@@ -36,7 +40,7 @@ const doctorSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   location: { type: String, required: true },
-  schedule: { type: Date, required: true }, 
+  schedule: { type: Date, required: true },
   fee: { type: Number, required: true }
 });
 
@@ -50,10 +54,10 @@ const generateVerificationKey = () => {
 // Send verification email
 const sendVerificationEmail = async (email, verificationKey) => {
   const transporter = nodemailer.createTransport({
-    service : 'gmail',
-    auth : {
-      user :'',
-      pass :''
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS
     }
   });
 
@@ -109,29 +113,31 @@ app.post('/api/verifyEmail', async (req, res) => {
   }
 });
 
-// eslint-disable-next-line no-undef
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-
-app.post('/add-doctor', async (req, res) => {
+app.post('/api/add-doctor', async (req, res) => {
   try {
     const { name, description, location, schedule, fee } = req.body;
     const newDoctor = new Doctor({ name, description, location, schedule, fee });
     await newDoctor.save();
     res.status(201).json(newDoctor);
   } catch (error) {
+    console.error('Error adding doctor:', error);
     res.status(500).json({ error: 'Failed to add doctor' });
   }
 });
 
-app.get('/doctors', async (req, res) => {
+app.get('/api/doctors', async (req, res) => {
   try {
     const doctors = await Doctor.find();
     res.status(200).json(doctors);
   } catch (error) {
+    console.error('Error fetching doctors:', error);
     res.status(500).json({ error: 'Failed to fetch doctors' });
   }
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {  loginUser , verifyEmail } from '../backend/api';
+import { verifyEmail } from '../backend/api';
 // import crypto from 'crypto';
 // import Home from './Home'; // Your home component
 // import View from './Doctor View';
@@ -41,18 +41,6 @@ function Register() {
       setIsVerificationSent(true);
     } catch (error) {
       setMessage('Failed to send verification email');
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await loginUser(username, password);
-      setMessage(response.message);
-      setUsername('');
-      setPassword('');
-    } catch (error) {
-      setMessage('Login failed');
     }
   };
 

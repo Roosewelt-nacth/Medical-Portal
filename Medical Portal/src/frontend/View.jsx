@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { addDoctor, getDoctors } from '../backend/api'; // Assuming the api file is correctly imported
 
 function View() {
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [doctors, setDoctors] = useState([]);
+  const [doctors, setDoctors] = useState([]); // Initialize as an empty array
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
-  const [schedule, setSchedule] = useState('');
+  const [schedule, setSchedule] = useState(new Date());
   const [fee, setFee] = useState('');
 
   useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await getDoctors();
+        setDoctors(response);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        setDoctors([]); // Ensure doctors is an empty array on error
+      }
+    };
     fetchDoctors();
   }, []);
-
-  const fetchDoctors = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/doctors');
-      setDoctors(response.data);
-    } catch (error) {
-      console.error('Error fetching doctors:', error);
-    }
-  };
 
   const handleButtonClick = () => {
     setIsFormVisible(true);
@@ -29,18 +32,26 @@ function View() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const newDoctor = { name, description, location, schedule, fee };
     try {
-      await axios.post('http://localhost:3000/add-doctor', newDoctor);
-      fetchDoctors(); // Refresh the list of doctors
+      await addDoctor(name, description, location, schedule, fee);
+      setName('');
+      setDescription('');
+      setLocation('');
+      setSchedule(new Date());
+      setFee('');
+      setIsFormVisible(false);
+      const response = await getDoctors();
+      setDoctors(response);
     } catch (error) {
       console.error('Error adding doctor:', error);
     }
-    setName('');
-    setDescription('');
-    setLocation('');
-    setSchedule('');
-    setFee('');
+  };
+
+  const handleScheduleChange = (date) => {
+    setSchedule(date);
+  };
+
+  const setIsFormNotVisible = () => {
     setIsFormVisible(false);
   };
 
@@ -49,8 +60,8 @@ function View() {
       <button onClick={handleButtonClick}>Add Doctor</button>
 
       {isFormVisible && (
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', background: 'rgba(0, 0, 0, 0.5)' }}>
-          <div style={{ background: 'white', padding: '20px', margin: '50px auto', width: '300px' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', background: '' }}>
+          <div style={{ background: 'black', padding: '20px', margin: '50px auto', width: '300px' }}>
             <form onSubmit={handleFormSubmit}>
               <div>
                 <label>Name:</label>
@@ -81,11 +92,11 @@ function View() {
               </div>
               <div>
                 <label>Schedule:</label>
-                <input
-                  type="text"
-                  value={schedule}
-                  onChange={(e) => setSchedule(e.target.value)}
-                  required
+                <DatePicker
+                  selected={schedule}
+                  onChange={handleScheduleChange}
+                  showTimeSelect
+                  dateFormat="MMMM d, yyyy h:mm aa"
                 />
               </div>
               <div>
@@ -97,7 +108,10 @@ function View() {
                   required
                 />
               </div>
-              <button type="submit">Submit</button>
+              <div>
+                <button type="submit">Submit</button>
+                <button type="button" onClick={setIsFormNotVisible}>Close</button>
+              </div>
             </form>
           </div>
         </div>
@@ -105,9 +119,13 @@ function View() {
 
       <h1>Doctor List</h1>
       <ul>
-        {doctors.map((doctor, index) => (
-          <li key={index}>
-            {doctor.name} - {doctor.description} - {doctor.location} - {doctor.schedule} - ₹{doctor.fee}
+        {Array.isArray(doctors) && doctors.map((doctor) => (
+          <li key={doctor._id}>
+            <h2>{doctor.name}</h2>
+            <p>Description: {doctor.description}</p>
+            <p>Location: {doctor.location}</p>
+            <p>Schedule: {new Date(doctor.schedule).toLocaleString()}</p>
+            <p>Fee: ₹{doctor.fee}</p>
           </li>
         ))}
       </ul>
